@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Forms | NexusForms{% endblock %}
+{% block page_title %}Forms{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <form class="search-bar" method="get" style="flex:1;margin-bottom:0">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search forms...">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+      <option value="published" {% if status_filter == 'published' %}selected{% endif %}>Published</option>
+      <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <a href="/forms/create/" class="btn btn-primary">+ New Form</a>
+</div>
+
+<div class="card">
+  {% if records %}
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Category</th><th>Status</th><th>Submissions</th><th>Created Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td><a href="/forms/{{ r.pk }}/edit/"><strong>{{ r.title }}</strong></a></td>
+        <td>{{ r.category|default:"-" }}</td>
+        <td><span class="badge badge-blue">{{ r.get_status_display }}</span></td>
+        <td>{{ r.submissions|default:"-" }}</td>
+        <td style="color:var(--muted)">{{ r.created_date|date:"M d, Y"|default:"-" }}</td>
+        <td class="actions">
+          <a href="/forms/{{ r.pk }}/edit/" class="btn btn-primary btn-sm">Edit</a>
+          <form method="post" action="/forms/{{ r.pk }}/delete/" style="display:inline" onsubmit="return confirm('Delete?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No forms found.</p>
+    <a href="/forms/create/" class="btn btn-primary" style="margin-top:1rem">Create Form</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
